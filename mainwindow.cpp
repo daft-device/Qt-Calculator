@@ -1,10 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-
-#include <QDebug>
-#include <QResizeEvent>
-// #include <QWidget>
-// #include <QGridLayout>
+#include "ipinputdialog.h"
 
 double firstNum;
 bool userInputSecondNum = false;
@@ -16,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // Sets the fixed app width and height
-    // setFixedSize(302, 361); // Note: Matches what was set in Design Mode for mainwindow.ui
+    setFixedSize(302, 361); // Note: Matches what was set in Design Mode for mainwindow.ui
 
     // Detect what digits are being entered
     connect(ui->pushButton_num0, SIGNAL(released()), this, SLOT(digit_pressed()));
@@ -45,30 +41,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_minus->setCheckable(true);
     ui->pushButton_multiply->setCheckable(true);
     ui->pushButton_divide->setCheckable(true);
-
-    // QWidget* central = new QWidget(this);
-    // QGridLayout* layout = new QGridLayout(central);
-    // layout->addWidget(ui->pushButton_equals);
-    // setCentralWidget(central);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::resizeEvent(QResizeEvent* event)
-{
-    QSize newSize = event->size();
-    QSize oldSize = event->oldSize();
-
-    qDebug() << "Window resized from " << oldSize << " to " << newSize;
-    // QMainWindow::resizeEvent(event); // Doesn't seem to resize the window proportionally?
-
-    // QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    // mainLayout->addWidget(ui->pushButton_equals);
-
-    // ui->pushButton_equals->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 /*
@@ -92,19 +69,18 @@ void MainWindow::digit_pressed()
     else
     {
         // Will allow you to enter "0.0xxxxxx", etc.
-        if (ui->label->text().contains('.') && button->text() == "0")
+        if (ui->display->text().contains('.') && button->text() == "0")
         {
-            newLabel = ui->label->text() + button->text();
+            newLabel = ui->display->text() + button->text();
         }
         else
         {
-            labelNumber = (ui->label->text() + button->text()).toDouble();
+            labelNumber = (ui->display->text() + button->text()).toDouble();
             newLabel = QString::number(labelNumber, 'g', 15);
         }
-        
     }
 
-    ui->label->setText(newLabel);
+    ui->display->setText(newLabel);
 }
 
 /*
@@ -112,8 +88,8 @@ void MainWindow::digit_pressed()
 */
 void MainWindow::on_pushButton_float_released()
 {
-    if (!ui->label->text().contains('.'))
-        ui->label->setText(ui->label->text() + ".");
+    if (!ui->display->text().contains('.'))
+        ui->display->setText(ui->display->text() + ".");
     else
     {
         // Second decimal point will not be entered
@@ -127,7 +103,7 @@ void MainWindow::on_pushButton_float_released()
 void MainWindow::unary_operation_pressed()
 {
     QPushButton* button = (QPushButton*)sender();
-    double labelNumber = ui->label->text().toDouble();
+    double labelNumber = ui->display->text().toDouble();
     QString newLabel;
 
     if (button->text() == "+/-")
@@ -140,7 +116,7 @@ void MainWindow::unary_operation_pressed()
     }
 
     newLabel = QString::number(labelNumber, 'g', 15);
-    ui->label->setText(newLabel);
+    ui->display->setText(newLabel);
 }
 
 /*
@@ -155,7 +131,7 @@ void MainWindow::on_pushButton_clear_released()
 
     userInputSecondNum = false;
 
-    ui->label->setText("0");
+    ui->display->setText("0");
 }
 
 /*
@@ -164,7 +140,7 @@ void MainWindow::on_pushButton_clear_released()
 */
 void MainWindow::on_pushButton_equals_released()
 {
-    double labelNumber = 0, secondNum = ui->label->text().toDouble();
+    double labelNumber = 0, secondNum = ui->display->text().toDouble();
     QString newLabel;
     bool divByZero = false;
 
@@ -200,9 +176,11 @@ void MainWindow::on_pushButton_equals_released()
     }
     
     if (!divByZero)
+    {
         newLabel = QString::number(labelNumber, 'g', 15);
+    }
     
-    ui->label->setText(newLabel);
+    ui->display->setText(newLabel);
 
     userInputSecondNum = false;
 }
@@ -215,7 +193,7 @@ void MainWindow::binary_operations_pressed()
 {
     QPushButton* button = (QPushButton*)sender();
     
-    firstNum = ui->label->text().toDouble();
+    firstNum = ui->display->text().toDouble();
 
     button->setChecked(true);
 }
@@ -226,7 +204,7 @@ void MainWindow::binary_operations_pressed()
 */
 void MainWindow::on_pushButton_del_released()
 {
-    QString currentText = ui->label->text();
+    QString currentText = ui->display->text();
     if (!currentText.isEmpty())
     {
         if (currentText.length() > 1)
@@ -238,7 +216,6 @@ void MainWindow::on_pushButton_del_released()
             currentText = QString("0");
         }
 
-        ui->label->setText(currentText);
+        ui->display->setText(currentText);
     }
 }
-
